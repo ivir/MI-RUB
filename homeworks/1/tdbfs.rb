@@ -8,13 +8,15 @@ class Node
   attr_accessor :status
     
   def initialize(id)
-    @id = id
+    @id = id.to_i
     @nodes = Array.new
     @status = FRESH
   end
   
   def connection(node)
     @nodes << node #vlozi do pole referenci
+    # jeste je nutne seradit. Jinak DFS hazi jiny vysledek
+    # @nodes.sort! {|x,y| y.id.to_i <=> x.id.to_i}
   end
   
   def remove(node)
@@ -61,6 +63,7 @@ class Graph
 	nodB = nod
 	#p "nodB nalezen."
       end
+      
     end
     # pokud existuji A i B, pokracujeme
     return if (nodA.nil? or nodB.nil?)
@@ -99,7 +102,7 @@ class Graph
       expanzor.status = OPEN
       #p "BFS expanzor #{expanzor.id}"
       # provedeme expanzi
-      expanzor.nodes.reverse_each do |nod|
+      expanzor.nodes.each do |nod|
 	#print "#{nod.id} "
 	if (nod.status == FRESH)
 	  nod.status = OPEN
@@ -137,6 +140,7 @@ class Graph
     pole.push(start_nod)
     
     cesta = Array.new
+    pole2 = Array.new
     
     begin
       # vyjmeme a ulozime do cesty
@@ -144,13 +148,23 @@ class Graph
       expanzor.status = OPEN
       #p "DFS expanzor #{expanzor.id}"
       # provedeme expanzi
-      expanzor.nodes.reverse_each do |nod|
+ 
+      expanzor.nodes.each do |nod|
 	#print "#{nod.id} "
 	if (nod.status == FRESH)
 	  nod.status = OPEN
-	  pole.push(nod)
+	  pole2.push(nod)
 	end
       end
+      
+      #nize uvedene serazeni je kvuli vysledku, aby byl podobny zadani
+      pole2.sort! {|x,y| y.id.to_i <=> x.id.to_i}
+      pole.concat(pole2)
+      pole2.clear
+      # -----------
+      
+      #pole.each { |z| print "#{z.id} " }
+      
       #print "\n"
       #gets
       
@@ -175,12 +189,25 @@ class Tdbfs
     }
     pocet_grafu = (radky.shift).to_i
     #p "Pocet grafu: #{pocet_grafu}."
+
+    if(pocet_grafu > 100)
+      p "Prilis mnoho zadanych grafu, maximum je 100."
+      return
+    end
+    
+    
     pocet_grafu.times do |graf|
       # definujeme novy graf -> proto new
       @graphs = Graph.new
       # nacteme pocet_bodu
       pocet_bodu = (radky.shift).to_i
       #p "Pocet bodu: #{pocet_bodu}."
+      
+      if (pocet_bodu < 1) and (pocet_bodu > 1000)
+	p "Pocet uzlu muzi byt v rozmezi 1...1000. Preskakuji"
+	next
+      end
+      
       pocet_bodu.times do |bod|
 	# pridame bod do grafu
 	@graphs.node_add(Node.new(bod+1))
@@ -197,7 +224,7 @@ class Tdbfs
 	pocet = (data.shift).to_i
 	#p "Pocet spoju #{pocet}."
 	pocet.times do
-	  #naceme souradnice
+	  #nacteme souradnice
 	  kam = (data.shift).to_i
 	  #p "#{kam} "
 	  @graphs.link_add(pro,kam)
@@ -205,7 +232,10 @@ class Tdbfs
       end
       #p "Jde se na dotazy"
       # dotazy
-      print "graph #{graf}\n"
+      print "graph #{graf+1}\n"
+      
+      dotazu = 0 # limit dotazu na pocet uzlu
+      
       begin
 	radek = radky.shift
 	# z radky musime vypreparovat odkud -> kam a pustit na to DFS + BFS
@@ -215,6 +245,12 @@ class Tdbfs
 	odkud = data.shift.to_i
 	metoda = data.shift.to_i
 	#p "Odkud #{odkud} a #{metoda}"
+	
+	if ( (odkud<0) and (odkud > pocet_bodu))
+	  p "Mimo rozsah: 1<=#{odkud}<=#{pocet_bodu}"
+	  next
+	end
+	
 	break if( (odkud==0)) # koncime
 	cesta = @graphs.bfs(odkud) if (metoda == 1)
 	cesta = @graphs.dfs(odkud) if (metoda == 0)
@@ -223,7 +259,10 @@ class Tdbfs
 	cesta.each {|x| print x, " " }
 	print "\n"
 	# posun
-      end while !( (odkud==0) and (metoda==0) ) or !(radky.nil?)
+	dotazu = dotazu.next #inkrementace o 1
+      end while !( (odkud==0) and (metoda==0) ) or !(dotazu > pocet_bodu)
+      p "Prilis mnoho dotazu." if (dotazu > pocet_bodu)
+      
     end
   end
 end
