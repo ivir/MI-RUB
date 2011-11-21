@@ -7,15 +7,19 @@ l,x,y = [0,0,0]
   begin
   print "Zadejte delku hrany #{ctverec_osloveni} ctverce: "
   l = gets
-  l = Integer(l)
-
-  print "Zadejte x-ovou souradnici stredu" + ctverec_osloveni + "ctverce: "
+  l = Float(l)
+  
+  if (l<0)
+    raise ArgumentError
+  end
+  
+  print "Zadejte x-ovou souradnici stredu" + ctverec_osloveni + " ctverce: "
   x = gets
-  x = Integer(x)
+  x = Float(x)
   
   print "Zadejte y-ovou souradnici stredu #{ctverec_osloveni} ctverce: "
   y = gets
-  y = Integer(y)
+  y = Float(y)
   
   ctverce[i] = [x,y,l]
   ctverec_osloveni = 'druheho'
