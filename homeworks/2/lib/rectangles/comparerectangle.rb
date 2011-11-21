@@ -31,8 +31,7 @@ class CompareRect
     x2 = [r1x2, r2x2].min
     y1 = [r1y,r2y].max
     y2 = [r1y2,r2y2].min
-    p [r1x,r1y,r1x2,r1y2]
-    p [r2x,r2y,r2x2,r2y2]
+
     spolecny_obsah = (x2-x1)*(y2-y1)
     obsah_cvercu = rect1.l * rect1.l + rect2.l * rect2.l
     return obsah_cvercu - spolecny_obsah
